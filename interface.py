@@ -1,5 +1,8 @@
 from tkinter import *
 from datetime import date as dt
+from tkinter import ttk
+from tkcalendar import DateEntry
+
 
 # ------------- Variables -----------------------
 
@@ -24,99 +27,131 @@ categorias = {
     'Vacaciones': ('Alquiler', 'Compra millas', 'Suscripciones', 'Aereos')
 }
 
+# ------------- Interface -----------------------
 
-
-    # ------------- Interface -----------------------
 raiz = Tk()
 raiz.title("Ingreso de gastos")
 raiz.resizable(width=True, height=True)
-raiz.iconbitmap('icono.ico')
+# raiz.iconbitmap('icono.ico')
 
-miframe = Frame(raiz)
-miframe.config(bg="red", bd=20)
-miframe.pack()
+miframe1 = Frame(raiz)
+miframe1.config()
+miframe1.pack()
+
+miframe2 = Frame(raiz)
+miframe2.config()
+miframe2.pack()
 
 # ------------- Funciones -----------------------
 
-def categoria(choice):
-    choice = categorias_var.get()
-    return choice
 
-
-
+def on_combobox_select(event):
+    subcategoriaentry.set("")
+    subcategoriaentry.config(values=categorias[categoriaentry.get()])
 
 
 hoy = dt.today()
-dd = hoy.strftime('%Y.%m.%d')
+dd = hoy.strftime('%d-%m-%y')
 
-# Labels
-pagolabel = Label(miframe, text='¿Quien pago?')
+
+# ------------- Barra Menu -----------------------
+
+barramenu = Menu(raiz)
+raiz.config(menu=barramenu)
+
+bbddmenu = Menu(barramenu, tearoff=0)
+bbddmenu.add_command(label='Conectar')
+bbddmenu.add_command(label='Salir')
+
+borrarmenu = Menu(barramenu, tearoff=0)
+borrarmenu.add_command(label='Borrar campos')
+
+ayudamenu = Menu(barramenu, tearoff=0)
+ayudamenu.add_command(label='Licencia')
+ayudamenu.add_command(label='Acerca de ..')
+
+barramenu.add_cascade(label='BBDD', menu=bbddmenu)
+barramenu.add_cascade(label='Borrar', menu=borrarmenu)
+barramenu.add_cascade(label='Ayuda', menu=ayudamenu)
+
+# ------------- Labels -----------------------
+
+pagolabel = Label(miframe1, text='¿Quien pago?')
 pagolabel.grid(row=0, column=0, sticky='e', padx=10, pady=10)
 
-fechalabel = Label(miframe, text='Fecha:')
+fechalabel = Label(miframe1, text='Fecha:')
 fechalabel.grid(row=1, column=0, sticky='e', padx=10, pady=10)
 
-destinolabel = Label(miframe, text='¿Para quién?')
+destinolabel = Label(miframe1, text='¿Para quién?')
 destinolabel.grid(row=2, column=0, sticky='e', padx=10, pady=10)
 
-categorialabel = Label(miframe, text='Categoria:')
+categorialabel = Label(miframe1, text='Categoria:')
 categorialabel.grid(row=3, column=0, sticky='e', padx=10, pady=10)
 
-subcategorialabel = Label(miframe, text='Subcategoria:')
+subcategorialabel = Label(miframe1, text='Subcategoria:')
 subcategorialabel.grid(row=4, column=0, sticky='e', padx=10, pady=10)
 
-mediolabel = Label(miframe, text='Medio de pago:')
+mediolabel = Label(miframe1, text='Medio de pago:')
 mediolabel.grid(row=5, column=0, sticky='e', padx=10, pady=10)
 
-costolabel = Label(miframe, text='Costo:')
+costolabel = Label(miframe1, text='Costo:')
 costolabel.grid(row=6, column=0, sticky='e', padx=10, pady=10)
 
-# Dataentry
-option1 = StringVar(miframe)
-pagoentry1 = Radiobutton(miframe, text='Ayelen',
+# ------------- Dataentry -----------------------
+
+option1 = StringVar(miframe1)
+pagoentry1 = Radiobutton(miframe1, text='Ayelen',
                          value='Ayelen', indicatoron=False, variable=option1, width=10)
-pagoentry2 = Radiobutton(miframe, text='Leonardo',
+pagoentry2 = Radiobutton(miframe1, text='Leonardo',
                          value='Leonardo', indicatoron=False, variable=option1, width=10)
 
 pagoentry1.grid(row=0, column=1)
 pagoentry2.grid(row=0, column=2)
 
-fechaentry = Entry(miframe, textvariable=hoy)
-fechaentry.grid(row=1, column=1)
+fechaentry = DateEntry(miframe1, width=20, year=hoy.year)
+fechaentry.grid(row=1, column=1, columnspan=2)
 
-option2 = StringVar(miframe)
-destinoentry1 = Radiobutton(miframe, text='Comun',
+option2 = StringVar(miframe1)
+destinoentry1 = Radiobutton(miframe1, text='Comun',
                             value='Comun', indicatoron=False, variable=option2, width=10)
 destinoentry2 = Radiobutton(
-    miframe, text='Ayelen', value='Ayelen', indicatoron=False, variable=option2, width=10)
+    miframe1, text='Ayelen', value='Ayelen', indicatoron=False, variable=option2, width=10)
 destinoentry3 = Radiobutton(
-    miframe, text='Leonardo', value='Leonardo', indicatoron=False, variable=option2, width=10)
+    miframe1, text='Leonardo', value='Leonardo', indicatoron=False, variable=option2, width=10)
 
 destinoentry1.grid(row=2, column=1, padx=10)
 destinoentry2.grid(row=2, column=2, padx=10)
 destinoentry3.grid(row=2, column=3, padx=10)
 
-
-categorias_var = StringVar()
-categoriaentry = OptionMenu(miframe, categorias_var,
-                            *categorias.keys(), command=categoria)
-categorias_var.set("Elegir una categoria")
-categoriaentry.config()
+categoriaentry = ttk.Combobox(miframe1, values=list(categorias.keys()))
 categoriaentry.grid(row=3, column=1, columnspan=2)
+categoriaentry.bind("<<ComboboxSelected>>", on_combobox_select)
 
-
-subcategorias_var = StringVar()
-subcategoriaentry = OptionMenu(
-    miframe, subcategorias_var, *subcategoria,)
-subcategorias_var.set("Elegir una categoria")
-subcategoriaentry.config()
+subcategoriaentry = ttk.Combobox(miframe1)
 subcategoriaentry.grid(row=4, column=1, columnspan=2)
 
-costoentry = Entry(miframe)
-costoentry.grid(row=6, column=1)
+option3 = StringVar(miframe1)
+medioentry1 = Radiobutton(miframe1, text='Efectivo',
+                          value='efectivo', indicatoron=False, variable=option2, width=10)
+medioentry2 = Radiobutton(
+    miframe1, text='Debito/Transferencia', value='debito', indicatoron=False, variable=option2, width=10)
+medioentry3 = Radiobutton(
+    miframe1, text='Credito', value='credito', indicatoron=False, variable=option2, width=10)
 
-botonenvio = Button(raiz, text='Enviar')
+medioentry1.grid(row=5, column=1, padx=10)
+medioentry2.grid(row=5, column=2, padx=10)
+medioentry3.grid(row=5, column=3, padx=10)
+
+costoentry = Entry(miframe1)
+costoentry.grid(row=6, column=1, columnspan=2)
+
+botonenvio = Button(miframe2, text='Enviar')
+botonenvio.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+
+botonborrar = Button(miframe2, text='Borrar')
+botonborrar.grid(row=1, column=1, padx=10, pady=10, sticky="e")
+
+botonsalir = Button(miframe2, text='Salir')
+botonsalir.grid(row=1, column=2, padx=10, pady=10, sticky="e")
 
 raiz.mainloop()
-
-subcategoria
