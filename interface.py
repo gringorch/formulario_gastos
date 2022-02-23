@@ -3,7 +3,7 @@ from datetime import date as dt
 from datetime import datetime
 from tkinter import ttk
 from tkcalendar import DateEntry
-import mysql.connector
+import sqlite3
 from mysql.connector.errors import ProgrammingError
 from tkinter import messagebox
 
@@ -34,6 +34,7 @@ categorias = {
 # ------------- Interface -----------------------
 
 raiz = Tk()
+raiz.iconbitmap("icono.ico")
 raiz.title("Ingreso de gastos")
 raiz.resizable(width=True, height=True)
 # raiz.iconbitmap('icono.ico')
@@ -53,28 +54,13 @@ def conexionBBDD():
 
     try:
 
-        miConexion = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            passwd='',
-            database='gastos'
-        )
-        messagebox.showwarning("¡Atención!", "La BBDD ya existe")
-
-    except ProgrammingError:
-
-        miConexion = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            passwd='',
-        )
+        miConexion = sqlite3.connect("GASTOS")
 
         miCursor = miConexion.cursor()
-        miCursor.execute('''CREATE DATABASE GASTOS''')
-        miCursor.execute('use gastos')
+
         miCursor.execute('''CREATE TABLE DATOS_GASTOS (
-	                ID INTEGER PRIMARY KEY auto_increment,
-                    FECHA date,
+	                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    FECHA TEXT,
                     USUARIO VARCHAR(10),
                     DESTINO VARCHAR(10),
                     CATEGORIA VARCHAR(30),
@@ -84,6 +70,11 @@ def conexionBBDD():
                     ) ''')
 
         messagebox.showinfo("BBDD", "BBDD creada con éxito")
+
+    except:
+
+        miConexion = sqlite3.connect("GASTOS")
+        messagebox.showwarning("¡Atención!", "La BBDD ya existe")
 
 
 def salir_app():
@@ -122,15 +113,9 @@ def crear():
         else:
             fecha_carga = datetime.strptime(fecha.get(), "%m/%d/%y")
 
-            miConexion = mysql.connector.connect(
-                host='localhost',
-                user='root',
-                passwd='',
-                database='gastos'
-            )
+            miConexion = sqlite3.connect("GASTOS")
             miCursor = miConexion.cursor()
 
-            miCursor.execute('use gastos')
             miCursor.execute(F'''INSERT INTO DATOS_GASTOS VALUES (
                         NULL,
                         "{fecha_carga.strftime("%Y-%m-%d")}",
@@ -162,16 +147,10 @@ def leer(event):
     if ID == 0:
         limpiar_campos()
     else:
-        miConexion = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            passwd='',
-            database='gastos'
-        )
+        miConexion = sqlite3.connect("GASTOS")
 
         miCursor = miConexion.cursor()
 
-        miCursor.execute('use gastos')
         miCursor.execute(F"SELECT * FROM DATOS_GASTOS WHERE ID = {ID}")
 
         datos = miCursor.fetchall()
@@ -179,7 +158,8 @@ def leer(event):
         if len(datos):
 
             for dato in datos:
-                fecha.set(dato[1].strftime("%m/%d/%y"))
+                fecha.set(datetime.strptime(
+                    dato[1], "%Y-%m-%d").strftime("%m/%d/%y"))
                 usuario.set(dato[2])
                 destino.set(dato[3])
                 categoria.set(dato[4])
@@ -198,15 +178,9 @@ def actualizar():
     else:
         fecha_carga = datetime.strptime(fecha.get(), "%m/%d/%y")
 
-        miConexion = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            passwd='',
-            database='gastos'
-        )
+        miConexion = sqlite3.connect("GASTOS")
         miCursor = miConexion.cursor()
 
-        miCursor.execute('use gastos')
         miCursor.execute(F'''UPDATE DATOS_GASTOS SET 
                     FECHA = "{fecha_carga.strftime("%Y-%m-%d")}",
                     USUARIO = "{usuario.get()}",
@@ -222,18 +196,13 @@ def actualizar():
         messagebox.showinfo("BBDD", "Registro actualizado con exito")
         limpiar_campos()
 
+
 def eliminar():
     activado = leer_var.get()
-    if activado and id.get()!=0:
-        miConexion = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            passwd='',
-            database='gastos'
-        )
+    if activado and id.get() != 0:
+        miConexion = sqlite3.connect("GASTOS")
         miCursor = miConexion.cursor()
 
-        miCursor.execute('use gastos')
         miCursor.execute(F'DELETE FROM DATOS_GASTOS WHERE ID = {id.get()}')
 
         miConexion.commit()
@@ -241,9 +210,8 @@ def eliminar():
         limpiar_campos()
 
     else:
-        messagebox.showerror("Error", "Debe seleccionar un registro para eliminarlo")
-
-
+        messagebox.showerror(
+            "Error", "Debe seleccionar un registro para eliminarlo")
 
     # ------------- Barra Menu -----------------------
 barramenu = Menu(raiz)
@@ -352,7 +320,7 @@ medioentry1 = Radiobutton(miframe1, text='Efectivo',
 medioentry2 = Radiobutton(
     miframe1, text='Debito/Transferencia', value='Debito', indicatoron=False, variable=medio, width=10)
 medioentry3 = Radiobutton(
-    miframe1, text='Credito', value='2Credito', indicatoron=False, variable=medio, width=10)
+    miframe1, text='Credito', value='Credito', indicatoron=False, variable=medio, width=10)
 
 medioentry1.grid(row=6, column=1, padx=10)
 medioentry2.grid(row=6, column=2, padx=10)
