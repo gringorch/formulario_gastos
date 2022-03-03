@@ -4,7 +4,6 @@ from datetime import datetime
 from tkinter import ttk
 from tkcalendar import DateEntry
 import sqlite3
-from mysql.connector.errors import ProgrammingError
 from tkinter import messagebox
 
 
@@ -12,8 +11,8 @@ from tkinter import messagebox
 
 categorias = {
     'Alimentos': ('Supermercado', 'Carniceria',
-                  'Almuerzo/Cena', 'Desayuno', 'Panaderia', 'Pastas', 'Fiambreria', 'Helado/dulces', 'Pescaderia', 'Verduleria'),
-    'Casa': ('Seguro', 'Arreglos MO', 'Materiales', 'Electro'),
+                  'Almuerzo/Cena', 'Desayuno', 'Panaderia', 'Pastas', 'Fiambreria', 'Helado/dulces', 'Pescaderia', 'Verduleria', 'Kiosco'),
+    'Casa': ('Seguro', 'Arreglos MO', 'Materiales', 'Electro', 'Limpieza'),
     'Auto': ('Seguro', 'Nafta', 'Service/Arreglos', 'Peajes', 'Lavadero', 'Patente'),
     'Impuestos': ('Rentas ABL', 'Aysa', 'Edesur', 'Metrogas'),
     'Servicios': ('Cablevisión', 'Netflix', 'Otro streaming',
@@ -21,7 +20,7 @@ categorias = {
     'Viaticos': ('SUBE', 'Taxi'),
     'Entretenimiento': ('Restaurante', 'Juegos',
                         'Cine/Teatro', 'Reuniones', 'Deportes'),
-    'Cuidado personal': ('Medicamentos', 'Obra Social', 'Peluqueria'),
+    'Cuidado personal': ('Medicamentos', 'Gimnasio', 'Obra Social', 'Peluqueria'),
     'Manutención': ('Manutención'),
     'Mascota': ('Comida', 'Piedritas', 'Jueguitos', 'Veterinaria', 'Medicamentos'),
     'Educación': ('Libreria', 'Libros', 'Cursos', 'Ingles'),
@@ -34,7 +33,6 @@ categorias = {
 # ------------- Interface -----------------------
 
 raiz = Tk()
-raiz.iconbitmap("icono.ico")
 raiz.title("Ingreso de gastos")
 raiz.resizable(width=True, height=True)
 # raiz.iconbitmap('icono.ico')
