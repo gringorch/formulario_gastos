@@ -1,6 +1,6 @@
 from tkinter import *
 from datetime import date as dt
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import ttk
 from tkcalendar import DateEntry
 import sqlite3
@@ -97,6 +97,9 @@ def limpiar_campos():
     subcategoriaentry.config(values="")
     medio.set("")
     monto.set("")
+    cuotaslabel.config(state='disable')
+    cuotasentry.config(state='disable')
+    cuotas.set("")
 
 
 def crear():
@@ -114,7 +117,25 @@ def crear():
             miConexion = sqlite3.connect("GASTOS")
             miCursor = miConexion.cursor()
 
-            miCursor.execute(F'''INSERT INTO DATOS_GASTOS VALUES (
+            if medio.get() == "Credito":
+
+                for i in range(cuotas.get()):
+
+                    fecha_carga = fecha_carga + timedelta(days=(30.5))
+
+                    miCursor.execute(F'''INSERT INTO DATOS_GASTOS VALUES (
+                        NULL,
+                        "{fecha_carga.strftime("%Y-%m-%d")}",
+                        "{usuario.get()}",
+                        "{destino.get()}",
+                        "{categoria.get()}",
+                        "{subcategoria.get()}",
+                        "{medio.get()}",
+                        {monto.get()}
+                        ) ''')
+            else:
+
+                miCursor.execute(F'''INSERT INTO DATOS_GASTOS VALUES (
                         NULL,
                         "{fecha_carga.strftime("%Y-%m-%d")}",
                         "{usuario.get()}",
@@ -211,6 +232,17 @@ def eliminar():
         messagebox.showerror(
             "Error", "Debe seleccionar un registro para eliminarlo")
 
+
+def cuotas():
+    if medio.get() == "Credito":
+        cuotaslabel.config(state='active')
+        cuotasentry.config(state='active')
+
+    else:
+        cuotaslabel.config(state='disable')
+        cuotasentry.config(state='disable')
+        cuotas.set("")
+
     # ------------- Barra Menu -----------------------
 barramenu = Menu(raiz)
 raiz.config(menu=barramenu)
@@ -259,8 +291,11 @@ subcategorialabel.grid(row=5, column=0, sticky='e', padx=10, pady=10)
 mediolabel = Label(miframe1, text='Medio de pago:')
 mediolabel.grid(row=6, column=0, sticky='e', padx=10, pady=10)
 
+cuotaslabel = Label(miframe1, text='Cuotas:', state='disable')
+cuotaslabel.grid(row=7, column=0, sticky='e', padx=10, pady=10)
+
 costolabel = Label(miframe1, text='Costo:')
-costolabel.grid(row=7, column=0, sticky='e', padx=10, pady=10)
+costolabel.grid(row=8, column=0, sticky='e', padx=10, pady=10)
 
 # ------------- Dataentry -----------------------
 
@@ -314,19 +349,26 @@ subcategoriaentry.grid(row=5, column=1, columnspan=2)
 
 medio = StringVar()
 medioentry1 = Radiobutton(miframe1, text='Efectivo',
-                          value='Efectivo', indicatoron=False, variable=medio, width=10)
+                          value='Efectivo', indicatoron=False, variable=medio, width=10, command=cuotas)
 medioentry2 = Radiobutton(
-    miframe1, text='Debito/Transferencia', value='Debito', indicatoron=False, variable=medio, width=10)
+    miframe1, text='Debito/Transferencia', value='Debito', indicatoron=False, variable=medio, width=10, command=cuotas)
 medioentry3 = Radiobutton(
-    miframe1, text='Credito', value='Credito', indicatoron=False, variable=medio, width=10)
+    miframe1, text='Credito', value='Credito', indicatoron=False, variable=medio, width=10, command=cuotas)
 
 medioentry1.grid(row=6, column=1, padx=10)
 medioentry2.grid(row=6, column=2, padx=10)
 medioentry3.grid(row=6, column=3, padx=10)
 
+cuotas = IntVar()
+cuotasentry = ttk.Combobox(
+    miframe1, textvariable=cuotas, state='disable', values=list(range(1, 19)))
+cuotasentry.grid(row=7, column=1, columnspan=2)
+cuotas.set("")
+
+
 monto = IntVar()
 costoentry = Entry(miframe1, textvariable=monto)
-costoentry.grid(row=7, column=1, columnspan=2)
+costoentry.grid(row=8, column=1, columnspan=2)
 
 botonenvio = Button(miframe2, text='Enviar', command=crear)
 botonenvio.grid(row=1, column=0, padx=10, pady=10, sticky="e")
